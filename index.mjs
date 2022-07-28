@@ -6,6 +6,11 @@ const startingBalance = stdlib.parseCurrency(100);
 const accAlice = await stdlib.newTestAccount(startingBalance);
 const accBob = await stdlib.newTestAccount(startingBalance);
 
+const fmt = (x) => stdlib.formatCurrency(x, 4)
+const getBalance = async (who) => fmt(await stdlib.balanceOf(who));
+const beforeAlice = await getBalance(accAlice);
+const beforeBob = await getBalance(accBob);
+
 const ctcAlice = accAlice.contract(backend)
 const ctcBob = accBob.contract(backend, ctcAlice.getInfo())
 
@@ -28,11 +33,22 @@ const Player = (Who) =>(
 
 await Promise.all([
     ctcAlice.p.Alice({
-        ...Player('Alice')
+        ...Player('Alice'),
+        wager: stdlib.parseCurrency(5)
 
     }),
     ctcBob.p.Bob({
-        ...Player('Bob')
+        ...Player('Bob'),
+        acceptWager: amt =>
+        {
+            console.log(`Bob accepts wager of ${fmt(amt)}`);
+        }
 
     }),
 ])
+
+const afterAlice = await getBalance(accAlice);
+const afterBob = await getBalance(accBob);
+
+console.log(`Alice started with ${beforeAlice}, ended with ${afterAlice}`);
+console.log(`Bob started with ${beforeBob}, ended with ${afterBob}`);
