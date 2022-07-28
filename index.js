@@ -1,6 +1,44 @@
-import { loadStdlib, ask } from '@reach-sh/stdlib';
+import React from 'react'
+import AppViews from './views/AppViews';
+import DeployerViews from './views/DeployerViews';
+import AttacherViews from './views/AttacherViews';
+import { renderDOM, renderView } from './views/render'
+import  './index.css'
+
+import { loadStdlib } from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
-const stdlib = loadStdlib(process.env);
+import { loadStdlib } from '@reach-sh/stdlib';
+const reach = loadStdlib(process.env);
+
+const handToInt = { 'ROCK': 0, 'PAPER': 1, 'SCISSORS': 2 };
+const intToOutcome = ['Bob Wins', 'Draw', 'Alice Wins'];
+const { standardUnit } = reach;
+const defaults = { defaultFundAmt: '10', defaultWager: '3', standardUnit };
+
+class App extends React.Component
+{ 
+    constructor(props)
+    {
+        super(props)
+    this.state = {view: 'ConnectAccount', ...defaults}
+    }
+    
+    async componentDidMount()
+    {
+        const acc = await reach.getDefaultAccount();
+        const balAtomic = await reach.balanceOf(acc);
+        const bal = reach.formatCurrency(balAtomic, 4);
+        this.setState({ acc, bal });
+        if(await reach.canFundFromFaucet())
+        {
+            this.setState({view: 'FundAccount'})
+        } else
+        {
+            this.setState({view: 'DeployOrAttacher'})
+        }
+    }
+    render(){ return renderView(this, AppViews) }
+}
 
 const isAlice = await ask.ask(`Are you Alice?`, ask.yesno)
 const who = isAlice ? 'Alice' : 'Bob';
