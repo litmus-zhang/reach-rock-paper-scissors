@@ -18,7 +18,8 @@ const HAND = ['Rock', 'Paper', 'Scissors'];
 const OUTCOME = ['Bob Wins', 'Draw', 'Alice Wins'];
 
 const Player = (Who) =>(
-{
+    {
+    ...stdlib.hasRandom,
         getHand: () =>
         {
         const hand = Math.floor(Math.random() * 3);
